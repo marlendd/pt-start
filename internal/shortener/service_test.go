@@ -78,6 +78,7 @@ func TestServiceShortenRejectsInvalidURL(t *testing.T) {
 		"without host":       "https:///some/path",
 		"too long": "https://example.com/" +
 			strings.Repeat("a", maxURLLength),
+		"raw whitespace": "https://example.com/some page",
 	}
 
 	for name, originalURL := range testCases {
@@ -360,4 +361,12 @@ func TestServiceResolveRejectsInvalidCode(t *testing.T) {
 			require.Zero(t, findCalls)
 		})
 	}
+}
+
+func TestValidateURLAcceptsFragment(t *testing.T) {
+	err := validateURL(
+		"https://example.com/page#section",
+	)
+
+	require.NoError(t, err)
 }

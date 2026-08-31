@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"unicode"
 )
 
 const (
@@ -83,7 +84,11 @@ func validateURL(originalURL string) error {
 		return ErrInvalidURL
 	}
 
-	parsedURL, err := url.ParseRequestURI(originalURL)
+	if strings.IndexFunc(originalURL, unicode.IsSpace) >= 0 {
+		return ErrInvalidURL
+	}
+
+	parsedURL, err := url.Parse(originalURL)
 	if err != nil {
 		return ErrInvalidURL
 	}
