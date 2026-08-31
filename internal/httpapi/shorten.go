@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log/slog"
 	"net/http"
 
 	"github.com/marlendd/pt-start/internal/shortener"
@@ -44,7 +43,8 @@ func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 		h.logger.ErrorContext(
 			r.Context(),
 			"failed to shorten URL",
-			slog.Any("error", err),
+			"error",
+			err,
 		)
 
 		h.writeError(

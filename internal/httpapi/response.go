@@ -3,7 +3,6 @@ package httpapi
 import (
 	"context"
 	"encoding/json"
-	"log/slog"
 	"net/http"
 )
 
@@ -23,7 +22,8 @@ func (h *Handler) writeJSON(
 		h.logger.WarnContext(
 			ctx,
 			"failed to write JSON response",
-			slog.Any("error", err),
+			"error",
+			err,
 		)
 	}
 
