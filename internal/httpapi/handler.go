@@ -11,11 +11,12 @@ const maxRequestBodySize = 4 << 10 // 4 KiB
 type errCode string
 
 const (
-	errCodeInvalidRequest  errCode = "invalid_request"
-	errCodeInvalidURL      errCode = "invalid_url"
-	errCodePayloadTooLarge errCode = "payload_too_large"
-	errCodeNotFound        errCode = "not_found"
-	errCodeInternal        errCode = "internal_error"
+	errCodeInvalidRequest   errCode = "invalid_request"
+	errCodeInvalidURL       errCode = "invalid_url"
+	errCodePayloadTooLarge  errCode = "payload_too_large"
+	errCodeNotFound         errCode = "not_found"
+	errCodeInternal         errCode = "internal_error"
+	errCodeMethodNotAllowed errCode = "method_not_allowed"
 )
 
 type Shortener interface {
