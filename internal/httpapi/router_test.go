@@ -22,6 +22,7 @@ func TestRouterRoutesShorten(t *testing.T) {
 
 	handler := NewHandler(
 		service,
+		nil,
 		newTestLogger(),
 		"http://localhost:8080",
 	)
@@ -57,6 +58,7 @@ func TestRouterSetsCodePathValue(t *testing.T) {
 
 	handler := NewHandler(
 		service,
+		nil,
 		newTestLogger(),
 		"http://localhost:8080",
 	)
@@ -82,6 +84,7 @@ func TestRouterSetsCodePathValue(t *testing.T) {
 func TestRouterRejectsWrongMethod(t *testing.T) {
 	handler := NewHandler(
 		shortenerStub{},
+		nil,
 		newTestLogger(),
 		"http://localhost:8080",
 	)
@@ -119,6 +122,7 @@ func TestRouterRejectsWrongMethod(t *testing.T) {
 func TestRouterReturnsNotFound(t *testing.T) {
 	handler := NewHandler(
 		shortenerStub{},
+		nil,
 		newTestLogger(),
 		"http://localhost:8080",
 	)
@@ -142,4 +146,36 @@ func TestRouterReturnsNotFound(t *testing.T) {
 		}`,
 		recorder.Body.String(),
 	)
+}
+
+func TestRouterRoutesHealthChecks(t *testing.T) {
+	checker := readinessCheckerStub{
+		pingFn: func(context.Context) error {
+			return nil
+		},
+	}
+
+	handler := NewHandler(
+		shortenerStub{},
+		checker,
+		newTestLogger(),
+		"http://localhost:8080",
+	)
+	router := NewRouter(handler)
+
+	for _, path := range []string{"/healthz", "/readyz"} {
+		t.Run(path, func(t *testing.T) {
+			request := httptest.NewRequest(http.MethodGet, path, nil)
+			recorder := httptest.NewRecorder()
+
+			router.ServeHTTP(recorder, request)
+
+			require.Equal(t, http.StatusOK, recorder.Code)
+			require.JSONEq(
+				t,
+				`{"status":"ok"}`,
+				recorder.Body.String(),
+			)
+		})
+	}
 }

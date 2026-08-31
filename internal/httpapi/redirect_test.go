@@ -31,6 +31,7 @@ func TestHandlerRedirectSuccess(t *testing.T) {
 
 	handler := NewHandler(
 		service,
+		nil,
 		newTestLogger(),
 		"http://localhost:8080",
 	)
@@ -94,6 +95,7 @@ func TestHandlerRedirectHandlesErrors(t *testing.T) {
 
 			handler := NewHandler(
 				service,
+				nil,
 				newTestLogger(),
 				"http://localhost:8080",
 			)

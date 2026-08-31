@@ -6,6 +6,22 @@ func NewRouter(handler *Handler) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc(
+		"/healthz",
+		handler.requireMethod(
+			http.MethodGet,
+			handler.Health,
+		),
+	)
+
+	mux.HandleFunc(
+		"/readyz",
+		handler.requireMethod(
+			http.MethodGet,
+			handler.Ready,
+		),
+	)
+
+	mux.HandleFunc(
 		"/shorten",
 		handler.requireMethod(
 			http.MethodPost,

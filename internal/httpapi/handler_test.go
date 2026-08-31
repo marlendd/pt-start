@@ -11,6 +11,14 @@ type shortenerStub struct {
 	resolveFn func(context.Context, string) (string, error)
 }
 
+type readinessCheckerStub struct {
+	pingFn func(context.Context) error
+}
+
+func (s readinessCheckerStub) Ping(ctx context.Context) error {
+	return s.pingFn(ctx)
+}
+
 func (s shortenerStub) Shorten(
 	ctx context.Context,
 	originalURL string,

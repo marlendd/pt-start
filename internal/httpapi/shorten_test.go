@@ -33,6 +33,7 @@ func TestHandlerShortenSuccess(t *testing.T) {
 
 	handler := NewHandler(
 		service,
+		nil,
 		newTestLogger(),
 		baseURL,
 	)
@@ -138,6 +139,7 @@ func TestHandlerShortenRejectsInvalidBody(t *testing.T) {
 
 			handler := NewHandler(
 				service,
+				nil,
 				newTestLogger(),
 				"http://localhost:8080",
 			)
@@ -207,6 +209,7 @@ func TestHandlerShortenHandlesServiceErrors(t *testing.T) {
 
 			handler := NewHandler(
 				service,
+				nil,
 				newTestLogger(),
 				"http://localhost:8080",
 			)

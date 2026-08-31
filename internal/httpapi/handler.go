@@ -17,7 +17,12 @@ const (
 	errCodeNotFound         errCode = "not_found"
 	errCodeInternal         errCode = "internal_error"
 	errCodeMethodNotAllowed errCode = "method_not_allowed"
+	errCodeNotReady         errCode = "not_ready"
 )
+
+type ReadinessChecker interface {
+	Ping(ctx context.Context) error
+}
 
 type Shortener interface {
 	Shorten(
@@ -33,12 +38,14 @@ type Shortener interface {
 
 type Handler struct {
 	shortener Shortener
+	readiness ReadinessChecker
 	logger    *slog.Logger
 	baseURL   string
 }
 
 func NewHandler(
 	shortener Shortener,
+	readiness ReadinessChecker,
 	logger *slog.Logger,
 	baseURL string,
 ) *Handler {
@@ -48,9 +55,14 @@ func NewHandler(
 
 	return &Handler{
 		shortener: shortener,
+		readiness: readiness,
 		logger:    logger,
 		baseURL:   strings.TrimRight(baseURL, "/"),
 	}
+}
+
+type healthResponse struct {
+	Status string `json:"status"`
 }
 
 type shortenRequest struct {
