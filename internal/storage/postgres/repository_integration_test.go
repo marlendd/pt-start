@@ -13,10 +13,12 @@ import (
 func newTestRepository(t *testing.T) *postgresstore.Repository {
 	t.Helper()
 
-	databaseURL := os.Getenv("TEST_DATABASE_URL")
-	if databaseURL == "" {
-		t.Skip("TEST_DATABASE_URL is not set")
+	if os.Getenv("RUN_INTEGRATION_TESTS") != "1" {
+		t.Skip("set RUN_INTEGRATION_TESTS=1")
 	}
+
+	databaseURL := os.Getenv("TEST_DATABASE_URL")
+	require.NotEmpty(t, databaseURL)
 
 	pool, err := pgxpool.New(t.Context(), databaseURL)
 	require.NoError(t, err)
@@ -25,7 +27,25 @@ func newTestRepository(t *testing.T) *postgresstore.Repository {
 
 	require.NoError(t, pool.Ping(t.Context()))
 
-	_, err = pool.Exec(t.Context(), "TRUNCATE TABLE links")
+	var databaseName string
+
+	err = pool.QueryRow(
+		t.Context(),
+		"SELECT current_database()",
+	).Scan(&databaseName)
+	require.NoError(t, err)
+
+	require.Equal(
+		t,
+		"shortener_test",
+		databaseName,
+		"refusing to truncate a non-test database",
+	)
+
+	_, err = pool.Exec(
+		t.Context(),
+		"TRUNCATE TABLE links",
+	)
 	require.NoError(t, err)
 
 	return postgresstore.NewRepository(pool)
@@ -46,7 +66,7 @@ func TestRepositorySaveAndFindByCode(t *testing.T) {
 		t.Context(),
 		code,
 	)
-	
+
 	require.NoError(t, err)
 	require.Equal(t, originalURL, resolvedURL)
 }

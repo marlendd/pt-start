@@ -31,5 +31,42 @@ services:
         condition: service_healthy
     restart: "no"
 
+  postgres-test:
+    image: postgres:17-alpine
+    profiles:
+      - test
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: shortener_test
+    ports:
+      - "127.0.0.1:${POSTGRES_TEST_HOST_PORT:-5434}:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}
+      interval: 2s
+      timeout: 3s
+      retries: 10
+
+  migrate-test:
+    image: migrate/migrate:v4.18.3
+    profiles:
+      - test
+    env_file:
+      - .env
+    volumes:
+      - ./migrations:/migrations:ro
+    command:
+      - -path=/migrations
+      - -database=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-test:5432/shortener_test?sslmode=disable
+      - up
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    restart: "no"
+
 volumes:
   postgres_data:

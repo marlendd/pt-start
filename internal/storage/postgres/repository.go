@@ -58,7 +58,7 @@ func (r *Repository) FindByCode(
 	ctx context.Context,
 	code string,
 ) (string, error) {
-	query := `
+	const query = `
 		SELECT original_url
 		FROM links
 		WHERE code = $1
