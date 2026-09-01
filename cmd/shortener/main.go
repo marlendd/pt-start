@@ -12,6 +12,7 @@ import (
 
 	"github.com/marlendd/pt-start/internal/config"
 	"github.com/marlendd/pt-start/internal/httpapi"
+	"github.com/marlendd/pt-start/internal/httpapi/middleware"
 	"github.com/marlendd/pt-start/internal/shortener"
 	"github.com/marlendd/pt-start/internal/storage/postgres"
 )
@@ -70,9 +71,11 @@ func run() error {
 
 	router := httpapi.NewRouter(handler)
 
+	httpHandler := middleware.RequestLogging(logger)(router)
+
 	server := newHTTPServer(
 		cfg.HTTPAddr,
-		router,
+		httpHandler,
 		logger,
 	)
 
