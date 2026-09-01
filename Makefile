@@ -1,4 +1,6 @@
-.PHONY: fmt test test-race vet check run up down logs ps config
+GOLANGCI_LINT_VERSION := v2.12.2
+
+.PHONY: fmt test test-race vet lint check run up down logs ps config
 
 fmt:
 	go fmt ./...
@@ -12,7 +14,14 @@ test-race:
 vet:
 	go vet ./...
 
-check: fmt test-race vet
+lint:
+	docker run --rm \
+		--volume "$(CURDIR):/app:ro" \
+		--workdir /app \
+		golangci/golangci-lint:$(GOLANGCI_LINT_VERSION)-alpine \
+		golangci-lint run
+
+check: fmt test-race vet lint
 
 run:
 	set -a; . ./.env; set +a; go run ./cmd/shortener
