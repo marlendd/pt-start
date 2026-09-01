@@ -71,7 +71,11 @@ func run() error {
 
 	router := httpapi.NewRouter(handler)
 
-	httpHandler := middleware.RequestLogging(logger)(router)
+	httpHandler := middleware.RequestLogging(logger)(
+		middleware.Recovery(logger)(
+			router,
+		),
+	)
 
 	server := newHTTPServer(
 		cfg.HTTPAddr,
