@@ -69,13 +69,21 @@ func run() error {
 		cfg.BaseURL,
 	)
 
-	router := httpapi.NewRouter(handler)
+	applicationRouter := httpapi.NewRouter(handler)
 
-	httpHandler := middleware.RequestLogging(logger)(
+	httpMetrics, metricsHandler := newMetrics()
+
+	applicationHandler := httpMetrics.Middleware(
 		middleware.Recovery(logger)(
-			router,
+			applicationRouter,
 		),
 	)
+
+	rootRouter := http.NewServeMux()
+	rootRouter.Handle("/metrics", metricsHandler)
+	rootRouter.Handle("/", applicationHandler)
+
+	httpHandler := middleware.RequestLogging(logger)(rootRouter)
 
 	server := newHTTPServer(
 		cfg.HTTPAddr,

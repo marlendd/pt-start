@@ -6,13 +6,21 @@ import (
 	"time"
 )
 
-type loggingResponseWriter struct {
+type responseWriter struct {
 	http.ResponseWriter
 	status int
 	size   int
 }
 
-func (w *loggingResponseWriter) WriteHeader(status int) {
+func (w *responseWriter) Status() int {
+	if w.status == 0 {
+		return http.StatusOK
+	}
+
+	return w.status
+}
+
+func (w *responseWriter) WriteHeader(status int) {
 	if w.status != 0 {
 		return
 	}
@@ -21,7 +29,7 @@ func (w *loggingResponseWriter) WriteHeader(status int) {
 	w.ResponseWriter.WriteHeader(status)
 }
 
-func (w *loggingResponseWriter) Write(body []byte) (int, error) {
+func (w *responseWriter) Write(body []byte) (int, error) {
 	if w.status == 0 {
 		w.WriteHeader(http.StatusOK)
 	}
@@ -40,16 +48,13 @@ func RequestLogging(
 			func(w http.ResponseWriter, r *http.Request) {
 				startedAt := time.Now()
 
-				writer := &loggingResponseWriter{
+				writer := &responseWriter{
 					ResponseWriter: w,
 				}
 
 				next.ServeHTTP(writer, r)
 
-				status := writer.status
-				if status == 0 {
-					status = http.StatusOK
-				}
+				status := writer.Status()
 
 				logger.InfoContext(
 					r.Context(),
