@@ -74,9 +74,6 @@ Application /metrics <-scrape- Prometheus <-query- Grafana
 
 Зависимости направлены внутрь: бизнес-логика знает только интерфейс `Repository`, поэтому HTTP и PostgreSQL можно тестировать и заменять независимо.
 
-### Дашборд Grafana
-![Дашборд Grafana](docs/dashboard.png)
-
 ## Выбор технологий
 
 | Технология | Причина выбора |
@@ -100,6 +97,12 @@ Application /metrics <-scrape- Prometheus <-query- Grafana
 | Race detector и `go vet` | Ошибок не обнаружено |
 | `golangci-lint v2.12.2` | `0 issues` |
 | Docker Compose | Конфигурация валидна; `/readyz` отвечает `200`, дашборд Grafana загружается автоматически |
+
+### Нагрузочный тест
+
+Локальный запуск в Docker Desktop: ApacheBench, `POST /shorten`, 20 параллельных клиентов, 30 секунд. Выполнено 217 305 запросов со средней скоростью 7 243 req/s, p95 – 5 ms, failed requests и 5xx – 0; память приложения не превысила 26 MiB.
+
+![Метрики приложения под нагрузкой](docs/dashboard.png)
 
 Основная локальная проверка:
 
